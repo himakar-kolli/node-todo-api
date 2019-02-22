@@ -26,7 +26,8 @@ MongoClient.connect(url, (err, client) => {
     // });
 
     db.collection('Users').find({
-      name: 'Himakar Kolli'
+      // name: 'Himakar Kolli'
+      name: 'Test User'
     }).toArray().then((docs) => {
       console.log(JSON.stringify(docs, undefined, 2));
     });
