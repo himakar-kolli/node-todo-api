@@ -1,4 +1,6 @@
 // const MongoClient = require('mongodb').MongoClient;
+
+// Object destructuring syntax; MongoClient & ObjectID properties are available on the returned mongoDB obj below:
 const {
   MongoClient,
   ObjectID
