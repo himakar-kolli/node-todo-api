@@ -24,17 +24,19 @@ MongoClient.connect(url, (err, client) => {
     // });
 
     // findOneAndDelete
-    // db.collection('Todos').findOneAndDelete({completed: false}).then((result) => {
-    //   console.log(result);
-    // });
+    db.collection('Todos').findOneAndDelete({
+      completed: false
+    }).then((result) => {
+      console.log(result);
+    });
 
     // db.collection('Users').deleteMany({name: 'Himakar'});
 
-    db.collection('Users').findOneAndDelete({
-      _id: new ObjectID("57ac8d47878a299e5dc21bc8")
-    }).then((results) => {
-      console.log(JSON.stringify(results, undefined, 2));
-    });
+    // db.collection('Users').findOneAndDelete({
+    //   _id: new ObjectID("57ac8d47878a299e5dc21bc8")
+    // }).then((results) => {
+    //   console.log(JSON.stringify(results, undefined, 2));
+    // });
 
     client.close();
   }
