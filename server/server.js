@@ -104,9 +104,10 @@ app.patch('/todos/:id', (req, res) => {
   }
 
   Todo.findByIdAndUpdate(id, {
-    $set: body // we use $set to set any property right! here we are setting the entire body (our modified) object
+    $set: body, // we use $set to set any property right! here we are setting the entire body (our modified) object
   }, {
-    new: true // returns our new/modified object
+    new: true, // returns our new/modified object
+    useFindAndModify: false // setting this makes sure that the deprecated 'findAndModify' is not being used here
   }).then((todo) => {
     if (!todo) {
       return res.status(404).send();
