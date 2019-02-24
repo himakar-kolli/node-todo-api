@@ -1,20 +1,21 @@
-var express = require('express');
-var bodyParser = require('body-parser');
-var {
+const _ = require('lodash');
+const express = require('express');
+const bodyParser = require('body-parser');
+const {
   ObjectID
 } = require('mongodb');
 
-var {
+const {
   mongoose
 } = require('./db/mongoose');
-var {
+const {
   Todo
 } = require('./models/todo');
-var {
+const {
   User
 } = require('./models/user');
 
-var app = express();
+const app = express();
 
 // if on heroku, port is available at process.env.PORT, else port will fall back to 3000.
 const port = process.env.PORT || 3000;
@@ -23,7 +24,7 @@ const port = process.env.PORT || 3000;
 app.use(bodyParser.json());
 
 app.post('/todos', (req, res) => {
-  var todo = new Todo({
+  const todo = new Todo({
     text: req.body.text
   });
 
@@ -36,8 +37,8 @@ app.post('/todos', (req, res) => {
 
 app.get('/todos', (req, res) => {
   Todo.find().then((todos) => {
-    res.send({
-      todos
+    res.send({ // sending todos wrapped in an object instead of sending it directly, coz for flexibility
+      todos // in case we want to return more data
     });
   }, (e) => {
     res.status(400).send(e);
@@ -65,7 +66,7 @@ app.get('/todos/:id', (req, res) => {
 });
 
 app.delete('/todos/:id', (req, res) => {
-  var id = req.params.id;
+  const id = req.params.id;
 
   if (!ObjectID.isValid(id)) {
     return res.status(404).send();
@@ -82,6 +83,41 @@ app.delete('/todos/:id', (req, res) => {
   }).catch((e) => {
     res.status(400).send();
   });
+});
+
+app.patch('/todos/:id', (req, res) => {
+  const id = req.params.id;
+
+  //Using Lodash we are 'picking' just those properties we want user to udpate (like only 'text' & 'completed')
+  const body = _.pick(req.body, ['text', 'completed']);
+
+  if (!ObjectID.isValid(id)) {
+    return res.status(404).send();
+  }
+
+  // if completed is a valid boolean & todo is 'completed' (i.e.. completed is set to true)
+  if (_.isBoolean(body.completed) && body.completed) {
+    body.completedAt = new Date().getTime(); // we set the current time in millisecs
+  } else {
+    body.completed = false; // setting it back to false
+    body.completedAt = null; // setting it back to null, coz not completed, so there's no time
+  }
+
+  Todo.findByIdAndUpdate(id, {
+    $set: body // we use $set to set any property right! here we are setting the entire body (our modified) object
+  }, {
+    new: true // returns our new/modified object
+  }).then((todo) => {
+    if (!todo) {
+      return res.status(404).send();
+    }
+
+    res.send({
+      todo
+    });
+  }).catch((e) => {
+    res.status(400).send();
+  })
 });
 
 app.listen(port, () => {
