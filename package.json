@@ -4,8 +4,12 @@
   "description": "",
   "main": "index.js",
   "scripts": {
+    "start": "ndoe server/server.js",
     "test": "mocha server/**/*.test.js",
     "test-watch": "nodemon --exec \"npm test\""
+  },
+  "engines": {
+    "node": "10.15.1"
   },
   "author": "Himakar",
   "license": "ISC",
