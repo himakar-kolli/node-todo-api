@@ -16,9 +16,10 @@ var {
 
 var app = express();
 
-// if on heroku, port is available at process.env.port, else port will fall back to 3000.
+// if on heroku, port is available at process.env.PORT, else port will fall back to 3000.
 const port = process.env.PORT || 3000;
 
+// Adding 'bodyParser' npm middleware to make sure user's inputs are valid and are of json types
 app.use(bodyParser.json());
 
 app.post('/todos', (req, res) => {
@@ -47,7 +48,7 @@ app.get('/todos/:id', (req, res) => {
   const id = req.params.id;
 
   if (!ObjectID.isValid(id)) { // test if the id is invalid
-    return res.status(404).send();
+    return res.status(404).send(); //returning, coz otherwise the rest of the code (down below) will go on to execute.
   }
 
   Todo.findById(id).then((todo) => {
@@ -59,6 +60,24 @@ app.get('/todos/:id', (req, res) => {
       todo
     });
   }).catch((e) => { // error case, when a promise is rejected
+    res.status(400).send();
+  });
+});
+
+app.delete('/todos/:id', (req, res) => {
+  var id = req.params.id;
+
+  if (!ObjectID.isValid(id)) {
+    return res.status(404).send();
+  }
+
+  Todo.findByIdAndDelete(id).then((todo) => {
+    if (!todo) {
+      return res.status(404).send();
+    }
+
+    res.send(todo);
+  }).catch((e) => {
     res.status(400).send();
   });
 });
