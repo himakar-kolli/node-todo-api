@@ -1,3 +1,6 @@
+// This sets up our basic configuration (Environment Variables, sort of) based on the Environment we are running on!
+require('./config/config');
+
 const _ = require('lodash');
 const express = require('express');
 const bodyParser = require('body-parser');
@@ -17,8 +20,8 @@ const {
 
 const app = express();
 
-// if on heroku, port is available at process.env.PORT, else port will fall back to 3000.
-const port = process.env.PORT || 3000;
+// If running on production, process.env.PORT is made available by Heroku, otherwise its available from our config.js file 
+const port = process.env.PORT;
 
 // Adding 'bodyParser' npm middleware to make sure user's inputs are valid and are of json types
 app.use(bodyParser.json());
