@@ -10,28 +10,19 @@ const {
 const {
   Todo
 } = require('./../models/todo');
-
-const todos = [{
-  _id: new ObjectID(),
-  text: 'First test todo'
-}, {
-  _id: new ObjectID(),
-  text: 'Second test todo',
-  completed: true,
-  completedAt: 333
-}];
+const {
+  todos,
+  populateTodos,
+  users,
+  populateUsers
+} = require('./seed/seed');
 
 /* 
   beforeEach() is a Mocha 'hook' that runs before executing each test case (each it() cond'n) in this file, 
   this hook is used to set up pre-conditions for our tests.. 
 */
-beforeEach((done) => {
-  Todo.deleteMany({}).then(() => {
-      return Todo.insertMany(todos);
-    })
-    .then(() => done())
-    .catch((e) => done(e));
-});
+beforeEach(populateUsers);
+beforeEach(populateTodos);
 
 describe('POST /todos', () => {
   it('should create a new todo', (done) => {
