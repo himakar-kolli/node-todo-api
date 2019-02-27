@@ -43,11 +43,11 @@ var UserSchema = new mongoose.Schema({
 });
 
 /* 1) You can add custom methods to a mongoose model by adding them to the .method property of a model.
-      These methods are later available to all of its objects.
-   2) Also, we can overwrite mongoose's custom methods like toJSON() method below.
+      These methods are available on all of its objects.
+   2) Also, we can overwrite mongoose's default methods like toJSON() method below.
       Here we do that to return only id & email arguments; excluding pwd & tokens */
 UserSchema.methods.toJSON = function () {
-  var user = this;
+  var user = this; // explicitely assigning 'this' keyword to 'user' var here, just for better readability 
   var userObject = user.toObject();
 
   return _.pick(userObject, ['_id', 'email']);
@@ -65,11 +65,27 @@ UserSchema.methods.generateAuthToken = function () {
     access,
     token
   });
-  // another way to push an element into an array is concat (regular push in mongoose seems to have some inconsistencies)
-  // user.tokens.concat([{access, token}]); 
 
   return user.save().then(() => {
     return token;
+  });
+};
+
+/* Just like our static methods in java, wherein methods belong to the class and not objects, below, by adding custom methods to the .statics property of a model, we make sure that those are available directly from the model. */
+UserSchema.statics.findByToken = function (token) {
+  var User = this; //notice the uppercase 'U' in User, coz representing model here and not object.
+  var decoded;
+
+  try {
+    decoded = jwt.verify(token, 'abc123');
+  } catch (e) {
+    return Promise.reject();
+  }
+
+  return User.findOne({
+    '_id': decoded._id,
+    'tokens.token': token,
+    'tokens.access': 'auth'
   });
 };
 
