@@ -4,8 +4,11 @@ var mongoose = require('mongoose');
 mongoose.Promise = global.Promise;
 
 // If production, process.env.MONGODB_URI is made available by Heroku, otherwise its available from our config.js file 
+
+// 'options' that we set below (useNewUrlParser, useCreateIndex) are to avoid deprecation errors
 mongoose.connect(process.env.MONGODB_URI, {
-  useNewUrlParser: true
+  useNewUrlParser: true,
+  useCreateIndex: true
 });
 
 module.exports = {

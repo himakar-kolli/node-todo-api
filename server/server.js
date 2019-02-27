@@ -124,6 +124,20 @@ app.patch('/todos/:id', (req, res) => {
   })
 });
 
+app.post('/users', (req, res) => {
+  var body = _.pick(req.body, ['email', 'password']);
+  var user = new User(body);
+
+  user.save().then((user) => {
+    return user.generateAuthToken();
+  }).then((token) => {
+    /* below we respond by sending back our new 'token' as part of the response header (x-auth), and our new 'user' object  (which is diff here right, coz it has our custom properties _id & email) */
+    res.header('x-auth', token).send(user);
+  }).catch((e) => {
+    res.status(400).send(e);
+  })
+});
+
 app.listen(port, () => {
   console.log(`Started on port ${port}`);
 });
