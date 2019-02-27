@@ -1,4 +1,6 @@
-// This sets up our basic configuration (Environment Variables, sort of) based on the Environment we are running on!
+/* 
+  This sets up our basic configuration (Environment Variables, sort of) based on the Environment we are running on!
+*/
 require('./config/config');
 
 const _ = require('lodash');
@@ -17,16 +19,20 @@ const {
 const {
   User
 } = require('./models/user');
-var {
+const {
   authenticate
 } = require('./middleware/authenticate');
 
 const app = express();
 
-// If running on production, process.env.PORT is made available by Heroku, otherwise its available from our config.js file 
+/*
+  If running on production, process.env.PORT is made available by Heroku, otherwise its available from our config.js file 
+*/
 const port = process.env.PORT;
 
-// Adding 'bodyParser' npm middleware to make sure user's inputs are valid and are of json types
+/*
+  Adding 'bodyParser' npm middleware to make sure user's inputs are valid and are of json types
+*/
 app.use(bodyParser.json());
 
 app.post('/todos', (req, res) => {
@@ -43,8 +49,8 @@ app.post('/todos', (req, res) => {
 
 app.get('/todos', (req, res) => {
   Todo.find().then((todos) => {
-    res.send({ // sending todos wrapped in an object instead of sending it directly, coz for flexibility
-      todos // in case we want to return more data
+    res.send({ // sending todos wrapped in an object instead of sending it directly, coz for flexibility and in case we want to return more data in future
+      todos
     });
   }, (e) => {
     res.status(400).send(e);
@@ -55,7 +61,7 @@ app.get('/todos/:id', (req, res) => {
   const id = req.params.id;
 
   if (!ObjectID.isValid(id)) { // test if the id is invalid
-    return res.status(404).send(); //returning, coz otherwise the rest of the code (down below) will go on to execute.
+    return res.status(404).send(); // returning, coz otherwise the rest of the code (down below) will go on to execute.
   }
 
   Todo.findById(id).then((todo) => {
@@ -94,14 +100,18 @@ app.delete('/todos/:id', (req, res) => {
 app.patch('/todos/:id', (req, res) => {
   const id = req.params.id;
 
-  //Using Lodash we are 'picking' just those properties we want user to udpate (like only 'text' & 'completed')
+  /*
+    Using Lodash we are 'picking' just those properties we want user to udpate (like only 'text' & 'completed')
+  */
   const body = _.pick(req.body, ['text', 'completed']);
 
   if (!ObjectID.isValid(id)) {
     return res.status(404).send();
   }
 
-  // if completed is a valid boolean & todo is 'completed' (i.e.. completed is set to true)
+  /*
+    If completed is a valid boolean & todo is 'completed' (i.e.. completed is set to true)
+  */
   if (_.isBoolean(body.completed) && body.completed) {
     body.completedAt = new Date().getTime(); // we set the current time in millisecs
   } else {
@@ -134,7 +144,9 @@ app.post('/users', (req, res) => {
   user.save().then((user) => {
     return user.generateAuthToken();
   }).then((token) => {
-    /* below we respond by sending back our new 'token' as part of the response header (x-auth), and our new 'user' object  (which is diff here right, coz it has our custom properties _id & email) */
+    /*
+      Below we respond by sending back our new 'token' as part of the response header (x-auth), and our new 'user' object  (which is diff here right, coz it has our custom properties _id & email) 
+    */
     res.header('x-auth', token).send(user);
   }).catch((e) => {
     res.status(400).send(e);

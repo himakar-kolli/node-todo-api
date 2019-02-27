@@ -21,8 +21,10 @@ const todos = [{
   completedAt: 333
 }];
 
-/* beforeEach() is a Mocha 'hook' that runs before executing each test case (each it() cond'n) in this file, 
-   this hook is used to set up pre-conditions for our tests.. */
+/* 
+  beforeEach() is a Mocha 'hook' that runs before executing each test case (each it() cond'n) in this file, 
+  this hook is used to set up pre-conditions for our tests.. 
+*/
 beforeEach((done) => {
   Todo.deleteMany({}).then(() => {
       return Todo.insertMany(todos);
