@@ -50,7 +50,7 @@ var UserSchema = new mongoose.Schema({
   2) Also, we can overwrite mongoose's default methods like toJSON() method below. Here we do that to return only id & email arguments; excluding pwd & tokens 
 */
 UserSchema.methods.toJSON = function () {
-  var user = this; // explicitely assigning 'this' keyword to 'user' var here, just for better readability 
+  var user = this; // explicitly assigning 'this' keyword to 'user' var here, just for better readability 
   var userObject = user.toObject();
 
   return _.pick(userObject, ['_id', 'email']);
