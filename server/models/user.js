@@ -94,6 +94,25 @@ UserSchema.statics.findByToken = function (token) {
   });
 };
 
+UserSchema.statics.findByCredentials = function (email, password) {
+  var User = this;
+
+  return User.findOne({
+    email
+  }).then((user) => {
+    if (!user) {
+      return Promise.reject();
+    }
+
+    return bcrypt.compare(password, user.password).then((res) => {
+      if (!res) {
+        return Promise.reject();
+      }
+      return Promise.resolve(user);
+    });
+  });
+};
+
 /* 
   'pre' is a Mongoose's Middleware hook, that can be attached as a 'pre-event' to any of the mongoose's functionality (like save below)
 */

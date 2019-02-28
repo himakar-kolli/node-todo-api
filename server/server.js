@@ -31,7 +31,7 @@ const app = express();
 const port = process.env.PORT;
 
 /*
-  Adding 'bodyParser' npm middleware to make sure user's inputs are valid and are of json types
+  Adding 'bodyParser' npm middleware to make sure user's inputs are valid json (application/json) types
 */
 app.use(bodyParser.json());
 
@@ -151,6 +151,18 @@ app.post('/users', (req, res) => {
   }).catch((e) => {
     res.status(400).send(e);
   })
+});
+
+app.post('/users/login', (req, res) => {
+  var body = _.pick(req.body, ['email', 'password']);
+
+  User.findByCredentials(body.email, body.password).then((user) => {
+    return user.generateAuthToken().then((token) => {
+      res.header('x-auth', token).send(user);
+    });
+  }).catch((e) => {
+    res.status(400).send();
+  });
 });
 
 app.get('/users/me', authenticate, (req, res) => {
