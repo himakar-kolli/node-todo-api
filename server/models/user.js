@@ -74,6 +74,18 @@ UserSchema.methods.generateAuthToken = function () {
   });
 };
 
+UserSchema.methods.removeToken = function (token) {
+  var user = this;
+
+  return user.update({
+    $pull: { // pull deletes an item, array or document exactly matching the condition you specify 
+      tokens: { // here we delete an entire token object (that has _id, access, token prop's) that matches the passed 'token' string 
+        token
+      }
+    }
+  });
+};
+
 /* 
   Just like our static methods in java, wherein methods belong to the class and not objects, below, by adding custom methods to the .statics property of a model, we make sure that those are available directly from the model. 
 */
