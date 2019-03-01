@@ -35,9 +35,10 @@ const port = process.env.PORT;
 */
 app.use(bodyParser.json());
 
-app.post('/todos', (req, res) => {
+app.post('/todos', authenticate, (req, res) => {
   const todo = new Todo({
-    text: req.body.text
+    text: req.body.text,
+    _creator: req.user._id
   });
 
   todo.save().then((doc) => {
@@ -47,9 +48,11 @@ app.post('/todos', (req, res) => {
   });
 });
 
-app.get('/todos', (req, res) => {
-  Todo.find().then((todos) => {
-    res.send({ // sending todos wrapped in an object instead of sending it directly, coz for flexibility and in case we want to return more data in future
+app.get('/todos', authenticate, (req, res) => {
+  Todo.find({
+    _creator: req.user._id
+  }).then((todos) => {
+    res.send({ // sending todos wrapped in an object instead of sending it directly, coz for flexibility and in case we want to return more data in the future
       todos
     });
   }, (e) => {
@@ -57,14 +60,17 @@ app.get('/todos', (req, res) => {
   });
 });
 
-app.get('/todos/:id', (req, res) => {
+app.get('/todos/:id', authenticate, (req, res) => {
   const id = req.params.id;
 
   if (!ObjectID.isValid(id)) { // test if the id is invalid
     return res.status(404).send(); // returning, coz otherwise the rest of the code (down below) will go on to execute.
   }
 
-  Todo.findById(id).then((todo) => {
+  Todo.findOne({
+    _id: id,
+    _creator: req.user._id
+  }).then((todo) => {
     if (!todo) { // test if the returned todo is empty, happens when no todo is found for that id
       return res.status(404).send();
     }
@@ -77,14 +83,17 @@ app.get('/todos/:id', (req, res) => {
   });
 });
 
-app.delete('/todos/:id', (req, res) => {
+app.delete('/todos/:id', authenticate, (req, res) => {
   const id = req.params.id;
 
   if (!ObjectID.isValid(id)) {
     return res.status(404).send();
   }
 
-  Todo.findByIdAndDelete(id).then((todo) => {
+  Todo.findOneAndRemove({
+    _id: id,
+    _creator: req.user._id
+  }).then((todo) => {
     if (!todo) {
       return res.status(404).send();
     }
@@ -97,9 +106,8 @@ app.delete('/todos/:id', (req, res) => {
   });
 });
 
-app.patch('/todos/:id', (req, res) => {
+app.patch('/todos/:id', authenticate, (req, res) => {
   const id = req.params.id;
-
   /*
     Using Lodash we are 'picking' just those properties we want user to udpate (like only 'text' & 'completed')
   */
@@ -119,7 +127,10 @@ app.patch('/todos/:id', (req, res) => {
     body.completedAt = null; // setting it back to null, coz not completed, so there's no time
   }
 
-  Todo.findByIdAndUpdate(id, {
+  Todo.findOneAndUpdate({
+    _id: id,
+    _creator: req.user._id
+  }, {
     $set: body, // we use $set to set any property right! here we are setting the entire body (our modified) object
   }, {
     new: true, // returns our new/modified object
@@ -137,7 +148,7 @@ app.patch('/todos/:id', (req, res) => {
   })
 });
 
-app.post('/users', (req, res) => {
+app.post('/users', (req, res) => { // sign-up
   var body = _.pick(req.body, ['email', 'password']);
   var user = new User(body);
 
@@ -153,7 +164,7 @@ app.post('/users', (req, res) => {
   })
 });
 
-app.post('/users/login', (req, res) => {
+app.post('/users/login', (req, res) => { // sign-in
   var body = _.pick(req.body, ['email', 'password']);
 
   User.findByCredentials(body.email, body.password).then((user) => {
@@ -165,11 +176,11 @@ app.post('/users/login', (req, res) => {
   });
 });
 
-app.get('/users/me', authenticate, (req, res) => {
+app.get('/users/me', authenticate, (req, res) => { // for me
   res.send(req.user);
 });
 
-app.delete('/users/me/token', authenticate, (req, res) => {
+app.delete('/users/me/token', authenticate, (req, res) => { // sign-out
   req.user.removeToken(req.token).then(() => {
     res.status(200).send();
   }, () => {

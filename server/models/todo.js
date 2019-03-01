@@ -14,7 +14,13 @@ var Todo = mongoose.model('Todo', {
   completedAt: {
     type: Number,
     default: null
+  },
+  _creator: { // associating a user's _id here, this tells us which user created this todo
+    type: mongoose.Schema.Types.ObjectId,
+    required: true
   }
 });
 
-module.exports = {Todo};
+module.exports = {
+  Todo
+};
