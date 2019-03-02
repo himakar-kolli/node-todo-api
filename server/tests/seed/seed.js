@@ -49,18 +49,24 @@ const todos = [{
 }];
 
 const populateTodos = (done) => {
-  Todo.deleteMany({}).then(() => {
-    return Todo.insertMany(todos);
-  }).then(() => done());
+  Todo.deleteMany({})
+    .then(() => {
+      return Todo.insertMany(todos);
+    })
+    .then(() => done())
+    .catch((e) => Promise.reject(e));
 };
 
 const populateUsers = (done) => {
-  User.deleteMany({}).then(() => {
-    var userOne = new User(users[0]).save();
-    var userTwo = new User(users[1]).save();
+  User.deleteMany({})
+    .then(() => {
+      const userOne = new User(users[0]).save();
+      const userTwo = new User(users[1]).save();
 
-    return Promise.all([userOne, userTwo])
-  }).then(() => done());
+      return Promise.all([userOne, userTwo])
+    })
+    .then(() => done())
+    .catch((e) => Promise.reject(e));
 };
 
 module.exports = {

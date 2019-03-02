@@ -16,7 +16,7 @@ const bcrypt = require('bcryptjs');
   }
 */
 
-var UserSchema = new mongoose.Schema({
+const UserSchema = new mongoose.Schema({
   email: {
     type: String,
     required: true,
@@ -50,16 +50,16 @@ var UserSchema = new mongoose.Schema({
   2) Also, we can overwrite mongoose's default methods like toJSON() method below. Here we do that to return only id & email arguments; excluding pwd & tokens 
 */
 UserSchema.methods.toJSON = function () {
-  var user = this; // explicitly assigning 'this' keyword to 'user' var here, just for better readability 
-  var userObject = user.toObject();
+  const user = this; // explicitly assigning 'this' keyword to 'user' const here, just for better readability 
+  const userObject = user.toObject();
 
   return _.pick(userObject, ['_id', 'email']);
 };
 
 UserSchema.methods.generateAuthToken = function () {
-  var user = this;
-  var access = 'auth';
-  var token = jwt.sign({
+  const user = this;
+  const access = 'auth';
+  const token = jwt.sign({
     _id: user._id.toHexString(),
     access
   }, process.env.JWT_SECRET).toString();
@@ -75,7 +75,7 @@ UserSchema.methods.generateAuthToken = function () {
 };
 
 UserSchema.methods.removeToken = function (token) {
-  var user = this;
+  const user = this;
 
   return user.update({
     $pull: { // pull deletes an item, array or document exactly matching the condition you specify 
@@ -90,8 +90,8 @@ UserSchema.methods.removeToken = function (token) {
   Just like our static methods in java, wherein methods belong to the class and not objects, below, by adding custom methods to the .statics property of a model, we make sure that those are available directly from the model. 
 */
 UserSchema.statics.findByToken = function (token) {
-  var User = this; // notice the uppercase 'U' in User, coz representing model here and not object.
-  var decoded;
+  const User = this; // notice the uppercase 'U' in User, coz representing model here and not object.
+  let decoded;
 
   try {
     decoded = jwt.verify(token, process.env.JWT_SECRET);
@@ -107,7 +107,7 @@ UserSchema.statics.findByToken = function (token) {
 };
 
 UserSchema.statics.findByCredentials = function (email, password) {
-  var User = this;
+  const User = this;
 
   return User.findOne({
     email
@@ -129,25 +129,32 @@ UserSchema.statics.findByCredentials = function (email, password) {
   'pre' is a Mongoose's Middleware hook, that can be attached as a 'pre-event' to any of the mongoose's functionality (like save below)
 */
 UserSchema.pre('save', function (next) {
-  var user = this;
+  const user = this;
 
   /* 
     We want to perform password hashing only when there's a change in the password (or the very 1st time when a user creates an account) and in no other case.
     so we track password changes using isModified() in order to hash the latesh password. 
   */
   if (user.isModified('password')) {
-    bcrypt.genSalt(10, (err, salt) => {
-      bcrypt.hash(user.password, salt, (err, hash) => {
+
+    bcrypt.genSalt(10)
+      .then((salt) => {
+        return bcrypt.hash(user.password, salt)
+      })
+      .then((hash) => {
         user.password = hash;
         next();
+      })
+      .catch((e) => {
+        Promise.reject(e);
       });
-    });
+
   } else {
     next();
   }
 });
 
-var User = mongoose.model('User', UserSchema);
+const User = mongoose.model('User', UserSchema);
 
 module.exports = {
   User

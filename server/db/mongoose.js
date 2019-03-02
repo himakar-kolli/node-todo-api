@@ -1,4 +1,4 @@
-var mongoose = require('mongoose');
+const mongoose = require('mongoose');
 
 /*
   By default, Promises are not available in Mongoose, so below we are setting our Native Promises to Mongoose Promises:  

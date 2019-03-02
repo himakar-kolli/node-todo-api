@@ -149,8 +149,8 @@ app.patch('/todos/:id', authenticate, (req, res) => {
 });
 
 app.post('/users', (req, res) => { // sign-up
-  var body = _.pick(req.body, ['email', 'password']);
-  var user = new User(body);
+  const body = _.pick(req.body, ['email', 'password']);
+  const user = new User(body);
 
   user.save().then((user) => {
     return user.generateAuthToken();
@@ -165,7 +165,7 @@ app.post('/users', (req, res) => { // sign-up
 });
 
 app.post('/users/login', (req, res) => { // sign-in
-  var body = _.pick(req.body, ['email', 'password']);
+  const body = _.pick(req.body, ['email', 'password']);
 
   User.findByCredentials(body.email, body.password).then((user) => {
     return user.generateAuthToken().then((token) => {
